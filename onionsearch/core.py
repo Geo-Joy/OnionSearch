@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 from functools import reduce
 from random import choice
-from multiprocessing import Pool, cpu_count, current_process, freeze_support
+from multiprocessing import Pool, cpu_count, current_process, freeze_support, RLock
 from tqdm import tqdm
 
 import requests
@@ -935,7 +935,7 @@ def scrape():
     freeze_support()
 
     results = {}
-    with Pool(units, initializer=tqdm.set_lock, initargs=(tqdm.get_lock(),)) as p:
+    with Pool(units, initializer=tqdm.set_lock(RLock()), initargs=(tqdm.get_lock(),)) as p:
         results_map = p.map(run_method, func_args)
         results = reduce(lambda a, b: a + b if b is not None else a, results_map)
 
